@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
                         isValid = true;
                         break;
                     case 3:
-                        BoardUtils.BOARD_TILES_PER_ROW = 20;
+                        BoardUtils.BOARD_TILES_PER_ROW = 24;
                         BoardUtils.NUM_BOARD_TILES = 480;
                         BoardUtils.NUM_BOMBS = 99;
                         BoardUtils.GAME_MODE = 4;
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
                         isValid = true;
                         break;
                     case 4:
-                        BoardUtils.BOARD_TILES_PER_ROW = 20;
+                        BoardUtils.BOARD_TILES_PER_ROW = 24;
                         BoardUtils.NUM_BOARD_TILES = 480;
                         BoardUtils.NUM_BOMBS = 99;
                         BoardUtils.GAME_MODE = 4;

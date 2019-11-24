@@ -6,12 +6,11 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,10 +18,11 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,7 +34,6 @@ import com.example.dntminesweeper.Board.BoardUtils;
 import com.example.dntminesweeper.Tiles.BombTile;
 import com.example.dntminesweeper.Tiles.Tile;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,58 +41,34 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class GameActivity extends AppCompatActivity implements
-        View.OnClickListener, View.OnLongClickListener, MediaPlayer.OnCompletionListener {
+        View.OnClickListener, MediaPlayer.OnCompletionListener {
 
     Map<Integer, Tile> boardSetup;
     Map<Integer, ImageView> tiles;
     Board board;
 
-    TextView bombcounter;
-    private TextView timerView;
-    private TextView scoreBoard;
-    private TextView flagcounter;
-    private ImageView gameface;
+    private TextView mTvBombCounter;
+    private TextView mTvTimer;
+    private TextView mTvFlagCounter;
+    private ImageView mImvGameFace;
+    private ImageButton mBtnReveal;
 
-    private boolean gameover = false;
+    private boolean isGameOver = false;
     private boolean timerStarted = false;
+    private boolean isGamePaused = false;
 
     private int seconds = 0;
     private int minutes = 0;
-    private int score = 0;
-    private int flagcount = 0;
-    private int gamesPlayed = 0;
-    private int gamesPlayedVeryEasy = 0;
-    private int gamesPlayedEasy = 0;
-    private int gamesPlayedNormal = 0;
-    private int gamesPlayedHard = 0;
-    private int gamesPlayedVeryHard = 0;
-    private int gameswon = 0;
-    private int gameswonVeryEasy = 0;
-    private int gameswonEasy = 0;
-    private int gameswonNormal = 0;
-    private int gameswonHard = 0;
-    private int gameswonVeryHard = 0;
-    private int timeplayedtotal_very_easy_seconds = 0;
-    private int timeplayedtotal_very_easy_minutes = 0;
-    private int timeplayedtotal_easy_seconds = 0;
-    private int timeplayedtotal_easy_minutes = 0;
-    private int timeplayedtotal_normal_seconds = 0;
-    private int timeplayedtotal_normal_minutes = 0;
-    private int timeplayedtotal_hard_seconds = 0;
-    private int timeplayedtotal_hard_minutes = 0;
-    private int timeplayedtotal_very_hard_seconds = 0;
-    private int timeplayedtotal_very_hard_minutes = 0;
+    private int flagCount = 0;
 
     private MediaPlayer mMediaPlayer;
-
+    private boolean isRevealingBomb = true;
     private boolean firstClick = true;
 
-    LinearLayout tileLayout;
-    ConstraintLayout gameLayout;
-    ConstraintLayout bannerLayout;
+    private LinearLayout tileLayout;
+    private ConstraintLayout gameLayout;
+    private RelativeLayout bannerLayout;
 
-    SharedPreferences sharedPreferences;
-    SharedPreferences.Editor sharedPrefeEditor;
     Timer timer;
 
     @SuppressLint({"CommitPrefEdits", "UseSparseArrays"})
@@ -103,34 +78,31 @@ public class GameActivity extends AppCompatActivity implements
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_game);
-
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        sharedPrefeEditor = sharedPreferences.edit();
-
         tileLayout = findViewById(R.id.tileLayout);
-        gameLayout = findViewById(R.id.gamelayout);
-        bannerLayout = findViewById(R.id.bannerLayout);
-        bombcounter = findViewById(R.id.bombtextview);
+        gameLayout = findViewById(R.id.gameLayout);
+        bannerLayout = findViewById(R.id.lo_bannerLayout);
+        mTvBombCounter = findViewById(R.id.tv_bomb);
 
+        mBtnReveal = findViewById(R.id.btn_reveal);
+        mBtnReveal.setOnClickListener(this);
         tiles = new HashMap<>();
-
         createGame();
         setContentView(createGameGrid(BoardUtils.NUM_BOARD_TILES, BoardUtils.BOARD_TILES_PER_ROW));
 
-        flagcounter = findViewById(R.id.flagcounter);
-        timerView = findViewById(R.id.timer);
-        scoreBoard = findViewById(R.id.score);
-        gameface = findViewById(R.id.gameface);
-        bombcounter.setText(String.valueOf(BoardUtils.NUM_BOMBS));
+        mTvFlagCounter = findViewById(R.id.tv_flagCounter);
+        mTvTimer = findViewById(R.id.tv_timer);
+        mImvGameFace = findViewById(R.id.imv_gameFace);
+        mTvBombCounter.setText("/ ");
+        mTvBombCounter.append(BoardUtils.NUM_BOMBS + "");
 
-        createHashMaptiles();
+        createHashMapTiles();
     }
 
-    private View createGameGrid(int numberofTiles, int tilesPerRow) {
+    private View createGameGrid(int numberOfTiles, int tilesPerRow) {
         gameLayout.removeAllViews();
         tileLayout.removeAllViews();
 
-        int rows = numberofTiles / tilesPerRow;
+        int rows = numberOfTiles / tilesPerRow;
 
         final LinearLayout MainLinearLayout = new LinearLayout(this);
         LinearLayout.LayoutParams layoutParamsMain = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -165,8 +137,8 @@ public class GameActivity extends AppCompatActivity implements
 
                 int height = size.y;
 
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams((height / 100) * 5, (height / 100) * 5, 1);
-
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams
+                        ((height / 100) * 5, (height / 100) * 5, 1);
                 tile.setLayoutParams(layoutParams);
                 tile.setImageDrawable(getResources().getDrawable(R.drawable.buttonv2));
                 l.addView(tile);
@@ -184,11 +156,10 @@ public class GameActivity extends AppCompatActivity implements
         set.connect(MainLinearLayout.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT, 25);
         set.connect(MainLinearLayout.getId(), ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT, 25);
         set.applyTo(gameLayout);
-
         return gameLayout;
     }
 
-    private void createHashMaptiles() {
+    private void createHashMapTiles() {
         int count = 0;
         for (int i = 0; i < tileLayout.getChildCount(); i++) {
             LinearLayout childLayout = (LinearLayout) tileLayout.getChildAt(i);
@@ -199,7 +170,6 @@ public class GameActivity extends AppCompatActivity implements
                 im.setTag(count);
                 im.getLayoutParams().width = 0;
                 im.setOnClickListener(this);
-                im.setOnLongClickListener(this);
                 tiles.put(count, im);
                 count++;
             }
@@ -207,41 +177,12 @@ public class GameActivity extends AppCompatActivity implements
     }
 
     private void createGame() {
-        restoreSharedPreferences();
-        gamesPlayed++;
-        sharedPrefeEditor.putInt("gamesPlayed", gamesPlayed);
-
-        switch (BoardUtils.GAME_MODE) {
-            case 1:
-                gamesPlayedVeryEasy++;
-                sharedPrefeEditor.putInt("games_played_very_easy", gamesPlayedVeryEasy);
-                break;
-            case 2:
-                gamesPlayedEasy++;
-                sharedPrefeEditor.putInt("games_played_easy", gamesPlayedEasy);
-                break;
-            case 3:
-                gamesPlayedNormal++;
-                sharedPrefeEditor.putInt("games_played_normal", gamesPlayedNormal);
-                break;
-            case 4:
-                gamesPlayedHard++;
-                sharedPrefeEditor.putInt("games_played_hard", gamesPlayedHard);
-                break;
-            case 5:
-                gamesPlayedVeryHard++;
-                sharedPrefeEditor.putInt("games_played_very_hard", gamesPlayedVeryHard);
-                break;
-        }
-
-        sharedPrefeEditor.commit();
-
         board = new Board();
         boardSetup = board.getGameBoard();
     }
 
+    Thread timerThread;
 
-    @SuppressWarnings("StatementWithEmptyBody")
     public void startTimer(boolean timerOn) {
         if (!timerOn) {
             if (timer != null) {
@@ -249,17 +190,17 @@ public class GameActivity extends AppCompatActivity implements
                 timer = null;
                 seconds = 0;
                 minutes = 0;
-                timerView.setText(R.string.default_timer_text);
+                mTvTimer.setText(R.string.default_timer_text);
             }
-            Thread thread = new Thread(new Runnable() {
+            timerThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     timer = new Timer();
                     timer.scheduleAtFixedRate(new TimerTask() {
                         @Override
                         public void run() {
-                            String stringSeconds = (seconds < 10) ? "0" + String.valueOf(seconds) : String.valueOf(seconds);
-                            String stringMinutes = (minutes < 10) ? "0" + String.valueOf(minutes) : String.valueOf(minutes);
+                            String stringSeconds = (seconds < 10) ? "0" + seconds : String.valueOf(seconds);
+                            String stringMinutes = (minutes < 10) ? "0" + minutes : String.valueOf(minutes);
                             updateTimerUI(stringMinutes + ":" + stringSeconds);
                             seconds++;
                             if (seconds == 60) {
@@ -270,23 +211,16 @@ public class GameActivity extends AppCompatActivity implements
                     }, 0, 1000);
                 }
             });
-            thread.start();
+            timerThread.start();
             timerStarted = true;
         }
     }
-
-
-    private void updateScoreBoard() {
-        String scoreString = String.valueOf(score);
-        scoreBoard.setText(scoreString);
-    }
-
 
     private void updateTimerUI(final String s) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                timerView.setText(s);
+                mTvTimer.setText(s);
             }
         });
     }
@@ -299,7 +233,6 @@ public class GameActivity extends AppCompatActivity implements
     }
 
     private void restoreState() {
-        gameswon = sharedPreferences.getInt("gameswon", 0);
         startTimer(timerStarted);
     }
 
@@ -311,29 +244,82 @@ public class GameActivity extends AppCompatActivity implements
 
     @Override
     public void onClick(View v) {
-        //noinspection SuspiciousMethodCalls
-        Tile t = boardSetup.get(v.getTag());
-
-        if (SettingsActivity.clickvibration) {
-            Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-            assert vib != null;
-            vib.vibrate(100);
-        }
-        if (firstClick && t instanceof BombTile || (firstClick && t.getNeighbourbombs() != 0)) {
-            board = new Board();
-            boardSetup = board.getGameBoard();
-            createHashMaptiles();
-            v.callOnClick();
-
+        if (v == mBtnReveal) {
+            mBtnReveal.setImageResource(isRevealingBomb ? R.drawable.flag2 : R.drawable.bomb_normal);
+            isRevealingBomb = !isRevealingBomb;
         } else {
-            if (!t.isRevealed()) {
-                revealTile((ImageView) v, t);
-                t.setRevealed(true);
-                startTimer(timerStarted);
-                score++;
-                v.setOnClickListener(null);
-                checkGameState();
-                firstClick = false;
+            Tile tile = boardSetup.get(v.getTag());
+//            if (tile.isRevealed()) {
+//                int bombCount = tile.getTileImageint();
+//                for (int j : tile.getNeighbours()) {
+//                    if (boardSetup.get(j).isFlagged()) {
+//                        bombCount--;
+//                    }
+//                }
+//                if(bombCount==0) {
+//                    for (int j : tile.getNeighbours()) {
+//                        if (!boardSetup.get(j).isRevealed() && !boardSetup.get(j).isFlagged()) {
+//                            revealTile(tiles.get(j), boardSetup.get(j));
+//                        }
+//                    }
+//                    v.setOnClickListener(null);
+//                }
+//            }
+            if (isRevealingBomb) {
+                if (SettingsActivity.clickvibration) {
+                    Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                    assert vib != null;
+                    vib.vibrate(100);
+                }
+                if (firstClick && tile instanceof BombTile || (firstClick && tile.getNeighbourbombs() != 0)) {
+                    board = new Board();
+                    boardSetup = board.getGameBoard();
+                    createHashMapTiles();
+                    v.callOnClick();
+                } else {
+                    if (!tile.isRevealed() && !tile.isFlagged()) {
+                        revealTile((ImageView) v, tile);
+                        tile.setRevealed(true);
+                        startTimer(timerStarted);
+                        checkGameState();
+                        firstClick = false;
+                    }
+                }
+            } else {
+                int tag = (int) v.getTag();
+                ImageView i = tiles.get(tag);
+
+                mMediaPlayer = MediaPlayer.create(this, R.raw.flagselector);
+                mMediaPlayer.setOnCompletionListener(this);
+
+                if (!tile.isFlagged() && !tile.isRevealed()) {
+                    i.setImageResource(R.drawable.flag2);
+                    tile.setFlagged(true);
+                    updateFlag(true);
+
+                    if (SettingsActivity.flagVibrationOn) {
+                        Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                        assert vib != null;
+                        vib.vibrate(100);
+                    }
+
+                    if (SettingsActivity.flagSoundOn) {
+                        mMediaPlayer.start();
+                    }
+
+
+                } else if (tile.isFlagged() && !tile.isRevealed()) {
+                    i.setImageDrawable(getResources().getDrawable(R.drawable.buttonv2));
+                    mMediaPlayer.start();
+                    tile.setFlagged(false);
+                    updateFlag(false);
+
+                    if (SettingsActivity.flagVibrationOn) {
+                        Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                        assert vib != null;
+                        vib.vibrate(100);
+                    }
+                }
             }
         }
     }
@@ -367,7 +353,6 @@ public class GameActivity extends AppCompatActivity implements
         });
         if (!t.isRevealed() && !(t instanceof BombTile)) {
             t.setRevealed(true);
-            //todo if animations are on animate else startReveal();
             animation.start();
         } else if (t instanceof BombTile) {
             animation.end();
@@ -412,28 +397,26 @@ public class GameActivity extends AppCompatActivity implements
                 v.setImageDrawable(getResources().getDrawable(R.drawable.bomb_exploded));
                 t.setTileImageint(-2);
                 timer.cancel();
-                gameover();
+                isGameOver();
                 break;
         }
-        scoreBoard.setText(String.valueOf(score));
     }
 
-    private void gameover() {
-        gameover = true;
-        score = (int) (score * 0.5);
-        AlertDialog.Builder gameoverDiag = new AlertDialog.Builder(this);
+    private void isGameOver() {
+        isGameOver = true;
+        AlertDialog.Builder isGameOverDiag = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
         revealAllTiles();
-        gameface.setImageDrawable(getResources().getDrawable(R.drawable.deadface));
-        gameoverDiag.setTitle("YOU LOST");
-        gameoverDiag.setPositiveButton("Play again", new DialogInterface.OnClickListener() {
+        mImvGameFace.setImageDrawable(getResources().getDrawable(R.drawable.deadface));
+        isGameOverDiag.setTitle("YOU LOST");
+        isGameOverDiag.setPositiveButton("Play again", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 timerStarted = false;
                 playAgain();
             }
         });
-        gameoverDiag.setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+        isGameOverDiag.setNegativeButton("Exit", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
@@ -452,7 +435,7 @@ public class GameActivity extends AppCompatActivity implements
             vib.vibrate(300);
         }
 
-        gameoverDiag.show();
+        isGameOverDiag.show();
     }
 
     private void revealAllTiles() {
@@ -497,64 +480,18 @@ public class GameActivity extends AppCompatActivity implements
         }
     }
 
-    @Override
-    public boolean onLongClick(View v) {
-        int tag = (int) v.getTag();
-        Tile t = boardSetup.get(tag);
-        ImageView i = tiles.get(tag);
-
-
-        mMediaPlayer = MediaPlayer.create(this, R.raw.flagselector);
-        mMediaPlayer.setOnCompletionListener(this);
-
-        if (!t.isFlagged() && !t.isRevealed()) {
-            score = score - 1;
-            updateScoreBoard();
-            i.setImageDrawable(getResources().getDrawable(R.drawable.flag));
-            t.setFlagged(true);
-            updateFlag(true);
-
-            if (SettingsActivity.flagVibrationOn) {
-                Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                assert vib != null;
-                vib.vibrate(100);
-            }
-
-            if (SettingsActivity.flagSoundOn) {
-                mMediaPlayer.start();
-            }
-
-
-        } else if (t.isFlagged() && !t.isRevealed()) {
-            score = score + 1;
-            updateScoreBoard();
-            i.setImageDrawable(getResources().getDrawable(R.drawable.buttonv2));
-            mMediaPlayer.start();
-            t.setFlagged(false);
-            updateFlag(false);
-
-            if (SettingsActivity.flagVibrationOn) {
-                Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                assert vib != null;
-                vib.vibrate(100);
-            }
-        }
-
-        return true;
-    }
-
     private void updateFlag(boolean increase) {
         if (increase) {
-            flagcount++;
-            flagcounter.setText(String.valueOf(flagcount));
+            flagCount++;
+            mTvFlagCounter.setText(String.valueOf(flagCount));
         } else {
-            flagcount--;
-            flagcounter.setText(String.valueOf(flagcount));
+            flagCount--;
+            mTvFlagCounter.setText(String.valueOf(flagCount));
         }
     }
 
     private void checkGameState() {
-        if (!gameover) {
+        if (!isGameOver) {
             int count = 0;
             for (int i = 0; i < BoardUtils.NUM_BOARD_TILES; i++) {
                 if (boardSetup.get(i).isRevealed() && !(boardSetup.get(i) instanceof BombTile)) {
@@ -562,44 +499,10 @@ public class GameActivity extends AppCompatActivity implements
                 }
 
                 if (count == BoardUtils.NUM_BOARD_TILES - BoardUtils.NUM_BOMBS) {
-                    gameover = true;
+                    isGameOver = true;
 
                     AlertDialog.Builder winDiag = new AlertDialog.Builder(this);
                     LayoutInflater inflater = this.getLayoutInflater();
-
-                    gameswon++;
-                    sharedPrefeEditor.putInt("gameswon", gameswon);
-                    gameswonVeryEasy = sharedPreferences.getInt("gameswon_very_easy", 0);
-                    gameswonEasy = sharedPreferences.getInt("gameswon_easy", 0);
-                    gameswonNormal = sharedPreferences.getInt("gameswon_normal", 0);
-                    gameswonHard = sharedPreferences.getInt("gameswon_hard", 0);
-                    gameswonVeryHard = sharedPreferences.getInt("gameswon_very_hard", 0);
-
-
-                    switch (BoardUtils.DIFFICULTY) {
-                        case 1:
-                            gameswonVeryEasy++;
-                            sharedPrefeEditor.putInt("gameswon_very_easy", gameswonVeryEasy);
-                            break;
-                        case 2:
-                            gameswonEasy++;
-                            sharedPrefeEditor.putInt("gameswon_easy", gameswonEasy);
-                            break;
-                        case 3:
-                            gameswonNormal++;
-                            sharedPrefeEditor.putInt("gameswon_normal", gameswonNormal);
-                            break;
-                        case 4:
-                            gameswonHard++;
-                            sharedPrefeEditor.putInt("gameswon_hard", gameswonHard);
-                            break;
-                        case 5:
-                            gameswonVeryHard++;
-                            sharedPrefeEditor.putInt("gameswon_very_hard", gameswonVeryHard);
-                            break;
-                    }
-
-                    sharedPrefeEditor.commit();
 
                     revealAllTiles();
                     timer.cancel();
@@ -640,42 +543,15 @@ public class GameActivity extends AppCompatActivity implements
         for (int i = 0; i < tiles.size(); i++) {
             tiles.get(i).setImageDrawable(getResources().getDrawable(R.drawable.buttonv2));
         }
-        gameface.setImageDrawable(getResources().getDrawable(R.drawable.happy_face));
-        flagcount = 0;
-        flagcounter.setText(String.valueOf(flagcount));
+        mImvGameFace.setImageDrawable(getResources().getDrawable(R.drawable.happy_face));
+        flagCount = 0;
+        mTvFlagCounter.setText(String.valueOf(flagCount));
         timerStarted = false;
-        gameover = false;
+        isGameOver = false;
         firstClick = true;
-
-
         createGame();
-        createHashMaptiles();
-    }
-
-
-    private void restoreSharedPreferences() {
-        gamesPlayed = sharedPreferences.getInt("gamesPlayed", 0);
-        gamesPlayedVeryEasy = sharedPreferences.getInt("games_played_very_easy", 0);
-        gamesPlayedEasy = sharedPreferences.getInt("games_played_easy", 0);
-        gamesPlayedNormal = sharedPreferences.getInt("games_played_normal", 0);
-        gamesPlayedHard = sharedPreferences.getInt("games_played_hard", 0);
-
-        gameswonVeryEasy = sharedPreferences.getInt("gameswon_very_easy", 0);
-        gameswonEasy = sharedPreferences.getInt("gameswon_easy", 0);
-        gameswonNormal = sharedPreferences.getInt("gameswon_normal", 0);
-        gameswonHard = sharedPreferences.getInt("gameswon_hard", 0);
-        gameswonVeryHard = sharedPreferences.getInt("gameswon_very_hard", 0);
-
-        timeplayedtotal_very_easy_seconds = sharedPreferences.getInt("timeplayedtotal_very_easy_seconds", 0);
-        timeplayedtotal_very_easy_minutes = sharedPreferences.getInt("timeplayedtotal_very_easy_minutes", 0);
-        timeplayedtotal_easy_seconds = sharedPreferences.getInt("timeplayedtotal_easy_seconds", 0);
-        timeplayedtotal_easy_minutes = sharedPreferences.getInt("timeplayedtotal_easy_minutes", 0);
-        timeplayedtotal_normal_seconds = sharedPreferences.getInt("timeplayedtotal_normal_seconds", 0);
-        timeplayedtotal_normal_minutes = sharedPreferences.getInt("timeplayedtotal_normal_minutes", 0);
-        timeplayedtotal_hard_seconds = sharedPreferences.getInt("timeplayedtotal_hard_seconds", 0);
-        timeplayedtotal_hard_seconds = sharedPreferences.getInt("timeplayedtotal_hard_minutes", 0);
-        timeplayedtotal_very_hard_seconds = sharedPreferences.getInt("timeplayedtotal_very_hard_seconds", 0);
-        timeplayedtotal_very_hard_minutes = sharedPreferences.getInt("timeplayedtotal_very_hard_minutes", 0);
+        mTvTimer.setText(R.string.default_timer_text);
+        createHashMapTiles();
     }
 
     @Override

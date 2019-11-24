@@ -9,7 +9,7 @@ public class Tile {
     private boolean isRevealed = false;
     private boolean isFlagged = false;
 
-    Tile() {
+    public Tile() {
         this.neighbours = new ArrayList<>();
         this.neighbourbombs = 99;
     }
