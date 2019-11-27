@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
@@ -66,9 +68,10 @@ public class GameActivity extends AppCompatActivity implements
     private boolean firstClick = true;
 
     private LinearLayout tileLayout;
-    private ConstraintLayout gameLayout;
+    private RelativeLayout gameLayout;
+    private ScrollView scrollView;
     private RelativeLayout bannerLayout;
-
+    private LinearLayout mRlGameDisplay;
     Timer timer;
 
     @SuppressLint({"CommitPrefEdits", "UseSparseArrays"})
@@ -80,9 +83,11 @@ public class GameActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_game);
         tileLayout = findViewById(R.id.tileLayout);
         gameLayout = findViewById(R.id.gameLayout);
+        scrollView = findViewById(R.id.sv_gameScroll);
         bannerLayout = findViewById(R.id.lo_bannerLayout);
-        mTvBombCounter = findViewById(R.id.tv_bomb);
+        mRlGameDisplay = findViewById(R.id.ll_gameDisplay);
 
+        mTvBombCounter = findViewById(R.id.tv_bomb);
         mBtnReveal = findViewById(R.id.btn_reveal);
         mBtnReveal.setOnClickListener(this);
         tiles = new HashMap<>();
@@ -101,7 +106,8 @@ public class GameActivity extends AppCompatActivity implements
     private View createGameGrid(int numberOfTiles, int tilesPerRow) {
         gameLayout.removeAllViews();
         tileLayout.removeAllViews();
-
+        scrollView.removeAllViews();
+        mRlGameDisplay.removeAllViews();
         int rows = numberOfTiles / tilesPerRow;
 
         final LinearLayout MainLinearLayout = new LinearLayout(this);
@@ -144,18 +150,11 @@ public class GameActivity extends AppCompatActivity implements
                 l.addView(tile);
             }
         }
-
-        gameLayout.addView(MainLinearLayout);
         gameLayout.addView(bannerLayout);
-
-        ConstraintSet set = new ConstraintSet();
-        set.clone(gameLayout);
-        set.connect(bannerLayout.getId(), ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
-        set.connect(MainLinearLayout.getId(), ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM, 90);
-        set.connect(MainLinearLayout.getId(), ConstraintSet.TOP, bannerLayout.getId(), ConstraintSet.BOTTOM, 50);
-        set.connect(MainLinearLayout.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT, 25);
-        set.connect(MainLinearLayout.getId(), ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT, 25);
-        set.applyTo(gameLayout);
+        scrollView.addView(MainLinearLayout);
+        mRlGameDisplay.setGravity(Gravity.CENTER);
+        mRlGameDisplay.addView(scrollView);
+        gameLayout.addView(mRlGameDisplay);
         return gameLayout;
     }
 
@@ -249,78 +248,80 @@ public class GameActivity extends AppCompatActivity implements
             isRevealingBomb = !isRevealingBomb;
         } else {
             Tile tile = boardSetup.get(v.getTag());
-//            if (tile.isRevealed()) {
-//                int bombCount = tile.getTileImageint();
-//                for (int j : tile.getNeighbours()) {
-//                    if (boardSetup.get(j).isFlagged()) {
-//                        bombCount--;
-//                    }
-//                }
-//                if(bombCount==0) {
-//                    for (int j : tile.getNeighbours()) {
-//                        if (!boardSetup.get(j).isRevealed() && !boardSetup.get(j).isFlagged()) {
-//                            revealTile(tiles.get(j), boardSetup.get(j));
-//                        }
-//                    }
-//                    v.setOnClickListener(null);
-//                }
-//            }
-            if (isRevealingBomb) {
-                if (SettingsActivity.clickvibration) {
-                    Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                    assert vib != null;
-                    vib.vibrate(100);
-                }
-                if (firstClick && tile instanceof BombTile || (firstClick && tile.getNeighbourbombs() != 0)) {
-                    board = new Board();
-                    boardSetup = board.getGameBoard();
-                    createHashMapTiles();
-                    v.callOnClick();
-                } else {
-                    if (!tile.isRevealed() && !tile.isFlagged()) {
-                        revealTile((ImageView) v, tile);
-                        tile.setRevealed(true);
-                        startTimer(timerStarted);
-                        checkGameState();
-                        firstClick = false;
+            if (tile.isRevealed()) {
+                int bombCount = tile.getTileImageint();
+                for (int j : tile.getNeighbours()) {
+                    if (boardSetup.get(j).isFlagged()) {
+                        bombCount--;
                     }
+                }
+                if (bombCount == 0) {
+                    for (int j : tile.getNeighbours()) {
+                        if (!boardSetup.get(j).isRevealed() && !boardSetup.get(j).isFlagged()) {
+                            revealTile(tiles.get(j), boardSetup.get(j));
+                        }
+                    }
+                    v.setOnClickListener(null);
                 }
             } else {
-                int tag = (int) v.getTag();
-                ImageView i = tiles.get(tag);
-
-                mMediaPlayer = MediaPlayer.create(this, R.raw.flagselector);
-                mMediaPlayer.setOnCompletionListener(this);
-
-                if (!tile.isFlagged() && !tile.isRevealed()) {
-                    i.setImageResource(R.drawable.flag2);
-                    tile.setFlagged(true);
-                    updateFlag(true);
-
-                    if (SettingsActivity.flagVibrationOn) {
+                if (isRevealingBomb) {
+                    if (SettingsActivity.clickvibration) {
                         Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                         assert vib != null;
                         vib.vibrate(100);
                     }
+                    if (firstClick && tile instanceof BombTile || (firstClick && tile.getNeighbourbombs() != 0)) {
+                        board = new Board();
+                        boardSetup = board.getGameBoard();
+                        createHashMapTiles();
+                        v.callOnClick();
+                    } else {
+                        if (!tile.isFlagged()) {
+                            revealTile((ImageView) v, tile);
+                            tile.setRevealed(true);
+                            startTimer(timerStarted);
+                            firstClick = false;
+                        }
+                    }
+                } else {
+                    int tag = (int) v.getTag();
+                    ImageView i = tiles.get(tag);
 
-                    if (SettingsActivity.flagSoundOn) {
+                    mMediaPlayer = MediaPlayer.create(this, R.raw.flagselector);
+                    mMediaPlayer.setOnCompletionListener(this);
+
+                    if (!tile.isFlagged()) {
+                        i.setImageResource(R.drawable.flag2);
+                        tile.setFlagged(true);
+                        updateFlag(true);
+
+                        if (SettingsActivity.flagVibrationOn) {
+                            Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                            assert vib != null;
+                            vib.vibrate(100);
+                        }
+
+                        if (SettingsActivity.flagSoundOn) {
+                            mMediaPlayer.start();
+                        }
+
+
+                    } else if (tile.isFlagged()) {
+                        i.setImageDrawable(getResources().getDrawable(R.drawable.buttonv2));
                         mMediaPlayer.start();
-                    }
+                        tile.setFlagged(false);
+                        updateFlag(false);
 
-
-                } else if (tile.isFlagged() && !tile.isRevealed()) {
-                    i.setImageDrawable(getResources().getDrawable(R.drawable.buttonv2));
-                    mMediaPlayer.start();
-                    tile.setFlagged(false);
-                    updateFlag(false);
-
-                    if (SettingsActivity.flagVibrationOn) {
-                        Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                        assert vib != null;
-                        vib.vibrate(100);
+                        if (SettingsActivity.flagVibrationOn) {
+                            Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                            assert vib != null;
+                            vib.vibrate(100);
+                        }
                     }
                 }
             }
+
+            checkGameState();
         }
     }
 
@@ -328,7 +329,7 @@ public class GameActivity extends AppCompatActivity implements
     private void revealTile(final ImageView v, final Tile t) {
         ObjectAnimator animation = ObjectAnimator.ofFloat(v, "rotationY", 0.0f, 180);
         final ObjectAnimator translateBack = ObjectAnimator.ofFloat(v, "rotationY", 0);
-        animation.setDuration(250);
+        animation.setDuration(200);
         animation.setRepeatCount(0);
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
         translateBack.setDuration(0);
@@ -363,11 +364,14 @@ public class GameActivity extends AppCompatActivity implements
         switch (t.getTileImageint()) {
             case 0:
                 v.setImageDrawable(getResources().getDrawable(R.drawable.emptytile));
+                boolean temp = isRevealingBomb;
+                isRevealingBomb = true;
                 for (int i : t.getNeighbours()) {
                     if (!(boardSetup.get(i) instanceof BombTile) && (i != -1)) {
                         tiles.get(i).callOnClick();
                     }
                 }
+                isRevealingBomb = temp;
                 break;
             case 1:
                 v.setImageDrawable(getResources().getDrawable(R.drawable.number_1));
@@ -546,6 +550,8 @@ public class GameActivity extends AppCompatActivity implements
         mImvGameFace.setImageDrawable(getResources().getDrawable(R.drawable.happy_face));
         flagCount = 0;
         mTvFlagCounter.setText(String.valueOf(flagCount));
+        isRevealingBomb = true;
+        mBtnReveal.setImageResource(R.drawable.bomb_normal);
         timerStarted = false;
         isGameOver = false;
         firstClick = true;
