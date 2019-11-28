@@ -72,7 +72,7 @@
                 android:layout_centerVertical="true"
                 android:background="@android:color/transparent"
                 android:scaleType="fitCenter"
-                android:src="@drawable/sound_on"
+                android:src="@drawable/ic_sound_on"
                 android:tint="@color/colorWhite" />
         </RelativeLayout>
 
@@ -98,7 +98,7 @@
                 android:layout_centerVertical="true"
                 android:background="@android:color/transparent"
                 android:scaleType="fitCenter"
-                android:src="@drawable/vibration_on"
+                android:src="@drawable/ic_vibration_on"
                 android:tint="@color/colorWhite" />
         </RelativeLayout>
 

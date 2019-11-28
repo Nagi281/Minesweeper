@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/backgr2"
+    android:background="@drawable/ic_home_background"
     tools:context=".MainActivity">
 
     <LinearLayout
@@ -11,7 +11,7 @@
         android:layout_height="360dp"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:background="@drawable/button"
+        android:background="@drawable/ic_button_shape"
         android:orientation="vertical"
         android:paddingLeft="15dp"
         android:paddingTop="15dp"

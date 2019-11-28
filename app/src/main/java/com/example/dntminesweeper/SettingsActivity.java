@@ -71,17 +71,17 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
     public void musicControl(boolean music) {
         if (music) {
-            mBtnSound.setImageDrawable(getResources().getDrawable(R.drawable.sound_off));
+            mBtnSound.setImageDrawable(getResources().getDrawable(R.drawable.ic_sound_off));
         } else {
-            mBtnSound.setImageDrawable(getResources().getDrawable(R.drawable.sound_on));
+            mBtnSound.setImageDrawable(getResources().getDrawable(R.drawable.ic_sound_on));
         }
     }
 
     public void vibrateControl(boolean vibrate) {
         if (vibrate) {
-            mBtnVibration.setImageDrawable(getResources().getDrawable(R.drawable.vibration_off));
+            mBtnVibration.setImageDrawable(getResources().getDrawable(R.drawable.ic_vibration_off));
         } else {
-            mBtnVibration.setImageDrawable(getResources().getDrawable(R.drawable.vibration_on));
+            mBtnVibration.setImageDrawable(getResources().getDrawable(R.drawable.ic_vibration_on));
         }
     }
 

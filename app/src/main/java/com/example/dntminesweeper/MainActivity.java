@@ -45,13 +45,18 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, SettingsActivity.class));
             }
         });
+        mBtnHelp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, HelpActivity.class));
+            }
+        });
     }
 
     public void showDifficultyMenu() {
         final String[] option = new String[]{"Fresher", "Junior", "Senior", "Expert",
                 "Custom ..."};
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.select_dialog_item, option);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_item, option);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setTitle("Select Difficulty Level");

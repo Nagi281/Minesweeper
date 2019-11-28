@@ -68,7 +68,7 @@ public class GameActivity extends AppCompatActivity implements
     private RelativeLayout gameLayout;
     private ScrollView scrollView;
     private RelativeLayout bannerLayout;
-    private LinearLayout mRlGameDisplay;
+    private RelativeLayout mRlGameDisplay;
     Timer timer;
 
     @SuppressLint({"CommitPrefEdits", "UseSparseArrays"})
@@ -82,7 +82,7 @@ public class GameActivity extends AppCompatActivity implements
         gameLayout = findViewById(R.id.gameLayout);
         scrollView = findViewById(R.id.sv_gameScroll);
         bannerLayout = findViewById(R.id.lo_bannerLayout);
-        mRlGameDisplay = findViewById(R.id.ll_gameDisplay);
+        mRlGameDisplay = findViewById(R.id.rl_gameDisplay);
 
         mTvBombCounter = findViewById(R.id.tv_bomb);
         mBtnReveal = findViewById(R.id.btn_reveal);
@@ -143,7 +143,7 @@ public class GameActivity extends AppCompatActivity implements
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams
                         ((height / 100) * 5, (height / 100) * 5, 1);
                 tile.setLayoutParams(layoutParams);
-                tile.setImageDrawable(getResources().getDrawable(R.drawable.buttonv2));
+                tile.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_empty_tile));
                 l.addView(tile);
             }
         }
@@ -241,7 +241,7 @@ public class GameActivity extends AppCompatActivity implements
     @Override
     public void onClick(View v) {
         if (v == mBtnReveal) {
-            mBtnReveal.setImageResource(isRevealingBomb ? R.drawable.flag2 : R.drawable.bomb_normal);
+            mBtnReveal.setImageResource(isRevealingBomb ? R.drawable.ic_classic_flag : R.drawable.ic_classic_mine_normal);
             isRevealingBomb = !isRevealingBomb;
         } else {
             Tile tile = boardSetup.get(v.getTag());
@@ -288,7 +288,7 @@ public class GameActivity extends AppCompatActivity implements
                     mMediaPlayer.setOnCompletionListener(this);
 
                     if (!tile.isFlagged()) {
-                        i.setImageResource(R.drawable.flag2);
+                        i.setImageResource(R.drawable.ic_classic_flag);
                         tile.setFlagged(true);
                         updateFlag(true);
 
@@ -304,7 +304,7 @@ public class GameActivity extends AppCompatActivity implements
 
 
                     } else if (tile.isFlagged()) {
-                        i.setImageDrawable(getResources().getDrawable(R.drawable.buttonv2));
+                        i.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_empty_tile));
                         mMediaPlayer.start();
                         tile.setFlagged(false);
                         updateFlag(false);
@@ -360,7 +360,7 @@ public class GameActivity extends AppCompatActivity implements
     private void startReveal(ImageView v, Tile t) {
         switch (t.getTileImageint()) {
             case 0:
-                v.setImageDrawable(getResources().getDrawable(R.drawable.emptytile));
+                v.setImageDrawable(getResources().getDrawable(R.drawable.ic_empty_tile));
                 boolean temp = isRevealingBomb;
                 isRevealingBomb = true;
                 for (int i : t.getNeighbours()) {
@@ -371,31 +371,31 @@ public class GameActivity extends AppCompatActivity implements
                 isRevealingBomb = temp;
                 break;
             case 1:
-                v.setImageDrawable(getResources().getDrawable(R.drawable.number_1));
+                v.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_num_1));
                 break;
             case 2:
-                v.setImageDrawable(getResources().getDrawable(R.drawable.number_2));
+                v.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_num_2));
                 break;
             case 3:
-                v.setImageDrawable(getResources().getDrawable(R.drawable.number_3));
+                v.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_num_3));
                 break;
             case 4:
-                v.setImageDrawable(getResources().getDrawable(R.drawable.number_4));
+                v.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_num_4));
                 break;
             case 5:
-                v.setImageDrawable(getResources().getDrawable(R.drawable.number_5));
+                v.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_num_5));
                 break;
             case 6:
-                v.setImageDrawable(getResources().getDrawable(R.drawable.number_6));
+                v.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_num_6));
                 break;
             case 7:
-                v.setImageDrawable(getResources().getDrawable(R.drawable.number_7));
+                v.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_num_7));
                 break;
             case 8:
-                v.setImageDrawable(getResources().getDrawable(R.drawable.number_8));
+                v.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_num_8));
                 break;
             case -1:
-                v.setImageDrawable(getResources().getDrawable(R.drawable.bomb_exploded));
+                v.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_mine_exploded));
                 t.setTileImageint(-2);
                 timer.cancel();
                 isGameOver();
@@ -408,7 +408,7 @@ public class GameActivity extends AppCompatActivity implements
         AlertDialog.Builder isGameOverDiag = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
         revealAllTiles();
-        mImvGameFace.setImageDrawable(getResources().getDrawable(R.drawable.deadface));
+        mImvGameFace.setImageDrawable(getResources().getDrawable(R.drawable.ic_deadface));
         isGameOverDiag.setTitle("YOU LOST");
         isGameOverDiag.setPositiveButton("Play again", new DialogInterface.OnClickListener() {
             @Override
@@ -447,34 +447,34 @@ public class GameActivity extends AppCompatActivity implements
                 ImageView v = tiles.get(i);
                 switch (t.getTileImageint()) {
                     case 0:
-                        v.setImageDrawable(getResources().getDrawable(R.drawable.emptytile));
+                        v.setImageDrawable(getResources().getDrawable(R.drawable.ic_empty_tile));
                         break;
                     case 1:
-                        v.setImageDrawable(getResources().getDrawable(R.drawable.number_1));
+                        v.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_num_1));
                         break;
                     case 2:
-                        v.setImageDrawable(getResources().getDrawable(R.drawable.number_2));
+                        v.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_num_2));
                         break;
                     case 3:
-                        v.setImageDrawable(getResources().getDrawable(R.drawable.number_3));
+                        v.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_num_3));
                         break;
                     case 4:
-                        v.setImageDrawable(getResources().getDrawable(R.drawable.number_4));
+                        v.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_num_4));
                         break;
                     case 5:
-                        v.setImageDrawable(getResources().getDrawable(R.drawable.number_5));
+                        v.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_num_5));
                         break;
                     case 6:
-                        v.setImageDrawable(getResources().getDrawable(R.drawable.number_6));
+                        v.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_num_6));
                         break;
                     case 7:
-                        v.setImageDrawable(getResources().getDrawable(R.drawable.number_7));
+                        v.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_num_7));
                         break;
                     case 8:
-                        v.setImageDrawable(getResources().getDrawable(R.drawable.number_8));
+                        v.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_num_8));
                         break;
                     case -1:
-                        v.setImageDrawable(getResources().getDrawable(R.drawable.bomb_normal));
+                        v.setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_mine_normal));
                         break;
                 }
             }
@@ -542,13 +542,13 @@ public class GameActivity extends AppCompatActivity implements
 
     private void playAgain() {
         for (int i = 0; i < tiles.size(); i++) {
-            tiles.get(i).setImageDrawable(getResources().getDrawable(R.drawable.buttonv2));
+            tiles.get(i).setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_empty_tile));
         }
-        mImvGameFace.setImageDrawable(getResources().getDrawable(R.drawable.happy_face));
+        mImvGameFace.setImageDrawable(getResources().getDrawable(R.drawable.im_happy_face));
         flagCount = 0;
         mTvFlagCounter.setText(String.valueOf(flagCount));
         isRevealingBomb = true;
-        mBtnReveal.setImageResource(R.drawable.bomb_normal);
+        mBtnReveal.setImageResource(R.drawable.ic_classic_mine_normal);
         timerStarted = false;
         isGameOver = false;
         firstClick = true;

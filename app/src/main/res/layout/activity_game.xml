@@ -23,7 +23,7 @@
             android:adjustViewBounds="true"
             android:contentDescription="Happy Face!"
             android:scaleType="fitCenter"
-            android:src="@drawable/happy_face" />
+            android:src="@drawable/im_happy_face" />
 
         <ImageView
             android:id="@+id/img_Flag"
@@ -35,7 +35,7 @@
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
             android:contentDescription="Flags Remaining"
-            android:src="@drawable/flag2" />
+            android:src="@drawable/ic_classic_flag" />
 
         <TextView
             android:id="@+id/tv_flagCounter"
@@ -71,7 +71,7 @@
             android:layout_toRightOf="@id/tv_bomb"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
-            app:srcCompat="@drawable/bomb_normal" />
+            app:srcCompat="@drawable/ic_classic_mine_normal" />
 
         <ImageButton
             android:id="@+id/btn_reveal"
@@ -83,7 +83,7 @@
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
-            android:src="@drawable/bomb_normal" />
+            android:src="@drawable/ic_classic_mine_normal" />
 
         <TextView
             android:id="@+id/tv_timer"
@@ -98,26 +98,26 @@
 
     </RelativeLayout>
 
-    <LinearLayout
-        android:id="@+id/ll_gameDisplay"
+    <RelativeLayout
+        android:id="@+id/rl_gameDisplay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/lo_bannerLayout"
-        android:layout_margin="10dp"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:layout_margin="10dp">
 
         <ScrollView
             android:id="@+id/sv_gameScroll"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true">
             <LinearLayout
                 android:id="@+id/tileLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical" />
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginBottom="32dp"
+                android:orientation="vertical"
+                android:weightSum="27"/>
         </ScrollView>
-    </LinearLayout>
+    </RelativeLayout>
 
 </RelativeLayout>
