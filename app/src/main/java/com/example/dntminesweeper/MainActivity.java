@@ -1,8 +1,5 @@
 package com.example.dntminesweeper;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,13 +9,13 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.dntminesweeper.Board.BoardUtils;
 
 public class MainActivity extends AppCompatActivity {
-    private Button mBtnNewGame;
-    private Button mBtnHighScore;
-    private Button mBtnOption;
-    private Button mBtnHelp;
+    private Button mBtnNewGame, mBtnHighScore, mBtnSettings, mBtnHelp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private void componentInit() {
         mBtnNewGame = findViewById(R.id.btn_NewGame);
         mBtnHighScore = findViewById(R.id.btn_HighScore);
-        mBtnOption = findViewById(R.id.btn_Options);
+        mBtnSettings = findViewById(R.id.btn_Settings);
         mBtnHelp = findViewById(R.id.btn_Help);
     }
 
@@ -40,6 +37,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 showDifficultyMenu();
+            }
+        });
+        mBtnSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
             }
         });
     }
@@ -84,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                         isValid = true;
                         break;
                     case 3:
-                        BoardUtils.BOARD_TILES_PER_ROW = 24;
+                        BoardUtils.BOARD_TILES_PER_ROW = 16;
                         BoardUtils.NUM_BOARD_TILES = 480;
                         BoardUtils.NUM_BOMBS = 99;
                         BoardUtils.GAME_MODE = 4;
@@ -93,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
                         isValid = true;
                         break;
                     case 4:
-                        BoardUtils.BOARD_TILES_PER_ROW = 24;
+                        BoardUtils.BOARD_TILES_PER_ROW = 16;
                         BoardUtils.NUM_BOARD_TILES = 480;
                         BoardUtils.NUM_BOMBS = 99;
                         BoardUtils.GAME_MODE = 4;

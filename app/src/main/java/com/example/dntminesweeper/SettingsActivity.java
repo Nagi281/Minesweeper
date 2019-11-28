@@ -1,21 +1,19 @@
 package com.example.dntminesweeper;
 
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class SettingsActivity extends AppCompatActivity {
-
-    public static boolean flagSoundOn = true;
-    public static boolean flagVibrationOn = true;
-    public static boolean gameOverSoundOn = true;
-    public static boolean gameOverVibrationOn = true;
-    public static boolean winGameSoundOn = true;
-    public static boolean winGameVibrationOn = true;
-    public static boolean clickvibration = true;
+public class SettingsActivity extends AppCompatActivity implements View.OnClickListener {
+    public static boolean isSoundOn = true;
+    public static boolean isVibrationOn = true;
+    public static boolean isMusicOn = true;
+    private ImageButton mBtnSound, mBtnMusic, mBtnVibration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,13 +21,68 @@ public class SettingsActivity extends AppCompatActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_settings);
-
-
+        componentsInit();
     }
 
-    public static void printthevalues() {
-        Log.d("SETTINGS", "printthevalues: flag sound on " + flagSoundOn + " " + "flag vibration on " + flagVibrationOn);
-        Log.d("SETTINGS", "printthevalues: gameover sound on " + gameOverSoundOn + " " + "game over vibration on " + gameOverVibrationOn);
-        Log.d("SETTINGS", "printthevalues: win game sound on " + winGameSoundOn + " " + "win vibration on " + winGameVibrationOn);
+    private void componentsInit() {
+        mBtnSound = findViewById(R.id.btn_SoundControl);
+        mBtnSound.setOnClickListener(this);
+        mBtnMusic = findViewById(R.id.btn_MusicControl);
+        mBtnMusic.setOnClickListener(this);
+        mBtnVibration = findViewById(R.id.btn_VibrateControl);
+        mBtnVibration.setOnClickListener(this);
+        findViewById(R.id.btn_back_settings).setOnClickListener(this);
+        musicControl(!isMusicOn);
+        soundControl(!isSoundOn);
+        vibrateControl(!isVibrationOn);
     }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btn_MusicControl:
+                soundControl(isMusicOn);
+                isMusicOn = !isMusicOn;
+                break;
+            case R.id.btn_SoundControl:
+                musicControl(isSoundOn);
+                isSoundOn = !isSoundOn;
+                break;
+            case R.id.btn_VibrateControl:
+                vibrateControl(isVibrationOn);
+                isVibrationOn = !isVibrationOn;
+                break;
+            case R.id.btn_back_settings:
+                onBackPressed();
+                break;
+            default:
+                Toast.makeText(this, "Error!", Toast.LENGTH_SHORT).show();
+                break;
+        }
+    }
+
+    public void soundControl(boolean sound) {
+        if (sound) {
+            mBtnMusic.setImageDrawable(getResources().getDrawable(R.drawable.ic_music_off));
+        } else {
+            mBtnMusic.setImageDrawable(getResources().getDrawable(R.drawable.ic_music_note));
+        }
+    }
+
+    public void musicControl(boolean music) {
+        if (music) {
+            mBtnSound.setImageDrawable(getResources().getDrawable(R.drawable.sound_off));
+        } else {
+            mBtnSound.setImageDrawable(getResources().getDrawable(R.drawable.sound_on));
+        }
+    }
+
+    public void vibrateControl(boolean vibrate) {
+        if (vibrate) {
+            mBtnVibration.setImageDrawable(getResources().getDrawable(R.drawable.vibration_off));
+        } else {
+            mBtnVibration.setImageDrawable(getResources().getDrawable(R.drawable.vibration_on));
+        }
+    }
+
 }

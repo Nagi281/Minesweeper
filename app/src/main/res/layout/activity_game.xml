@@ -83,7 +83,7 @@
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/bomb_normal" />
+            android:src="@drawable/bomb_normal" />
 
         <TextView
             android:id="@+id/tv_timer"

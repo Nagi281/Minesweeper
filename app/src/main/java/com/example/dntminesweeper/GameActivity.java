@@ -10,7 +10,6 @@ import android.graphics.Point;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -28,8 +27,6 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.example.dntminesweeper.Board.Board;
 import com.example.dntminesweeper.Board.BoardUtils;
@@ -265,7 +262,7 @@ public class GameActivity extends AppCompatActivity implements
                 }
             } else {
                 if (isRevealingBomb) {
-                    if (SettingsActivity.clickvibration) {
+                    if (SettingsActivity.isVibrationOn) {
                         Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                         assert vib != null;
                         vib.vibrate(100);
@@ -295,13 +292,13 @@ public class GameActivity extends AppCompatActivity implements
                         tile.setFlagged(true);
                         updateFlag(true);
 
-                        if (SettingsActivity.flagVibrationOn) {
+                        if (SettingsActivity.isVibrationOn) {
                             Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                             assert vib != null;
                             vib.vibrate(100);
                         }
 
-                        if (SettingsActivity.flagSoundOn) {
+                        if (SettingsActivity.isVibrationOn) {
                             mMediaPlayer.start();
                         }
 
@@ -312,7 +309,7 @@ public class GameActivity extends AppCompatActivity implements
                         tile.setFlagged(false);
                         updateFlag(false);
 
-                        if (SettingsActivity.flagVibrationOn) {
+                        if (SettingsActivity.isVibrationOn) {
                             Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                             assert vib != null;
                             vib.vibrate(100);
@@ -427,13 +424,13 @@ public class GameActivity extends AppCompatActivity implements
             }
         });
 
-        if (SettingsActivity.gameOverSoundOn) {
+        if (SettingsActivity.isSoundOn) {
             mMediaPlayer = MediaPlayer.create(this, R.raw.gameoversound);
             mMediaPlayer.setOnCompletionListener(this);
             mMediaPlayer.start();
         }
 
-        if (SettingsActivity.gameOverVibrationOn) {
+        if (SettingsActivity.isVibrationOn) {
             Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
             assert vib != null;
             vib.vibrate(300);
@@ -526,13 +523,13 @@ public class GameActivity extends AppCompatActivity implements
                         }
                     });
 
-                    if (SettingsActivity.winGameSoundOn) {
+                    if (SettingsActivity.isSoundOn) {
                         mMediaPlayer = MediaPlayer.create(this, R.raw.winsound);
                         mMediaPlayer.setOnCompletionListener(this);
                         mMediaPlayer.start();
                     }
 
-                    if (SettingsActivity.winGameVibrationOn) {
+                    if (SettingsActivity.isVibrationOn) {
                         Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                         assert vib != null;
                         vib.vibrate(300);
