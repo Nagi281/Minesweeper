@@ -15,10 +15,7 @@ import android.widget.Toast;
 import com.example.dntminesweeper.Board.BoardUtils;
 
 public class MainActivity extends AppCompatActivity {
-    private Button mBtnNewGame;
-    private Button mBtnHighScore;
-    private Button mBtnOption;
-    private Button mBtnHelp;
+    private Button mBtnNewGame, mBtnHighScore, mBtnOption, mBtnHelp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +37,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 showDifficultyMenu();
+            }
+        });
+        mBtnHelp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(),HelpActivity.class));
             }
         });
     }
