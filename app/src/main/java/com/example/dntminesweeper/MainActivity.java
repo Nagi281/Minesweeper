@@ -1,5 +1,6 @@
 package com.example.dntminesweeper;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,15 +13,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.dntminesweeper.Board.BoardUtils;
 
 public class MainActivity extends AppCompatActivity {
-    private Button mBtnNewGame, mBtnHighScore, mBtnSettings, mBtnHelp;
-    SharedPreferences userSettings;
+    private Button mBtnResume, mBtnNewGame, mBtnHighScore, mBtnSettings, mBtnHelp;
+    private SharedPreferences userSettings, gameSettings;
     private String username, gameMode;
+    private int GAME_START = 113;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void componentInit() {
+        mBtnResume = findViewById(R.id.btn_ResumeGame);
         mBtnNewGame = findViewById(R.id.btn_NewGame);
         mBtnHighScore = findViewById(R.id.btn_HighScore);
         mBtnSettings = findViewById(R.id.btn_Settings);
@@ -38,6 +42,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startEventListening() {
+        mBtnResume.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final Intent newGameIntent = new Intent(MainActivity.this, GameActivity.class);
+                newGameIntent.putExtra("gameState", "resume");
+                newGameIntent.putExtra("gameMode", gameMode);
+                startActivityForResult(newGameIntent, GAME_START);
+            }
+        });
         mBtnNewGame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -113,76 +126,87 @@ public class MainActivity extends AppCompatActivity {
                 "Custom ..."};
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_item, option);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
         builder.setTitle("Select Difficulty Level");
         builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int position) {
-                boolean isValid = false;
+                boolean isValid = true;
                 switch (position) {
                     case 0:
-                        BoardUtils.BOARD_TILES_PER_ROW = 9;
-                        BoardUtils.NUM_BOARD_TILES = 81;
-                        BoardUtils.NUM_BOMBS = 10;
-                        BoardUtils.GAME_MODE = BoardUtils.DIFFICULTY = 1;
+                        setGameMode(9, 81, 10, 1);
                         gameMode = "fresherRecord";
                         Toast.makeText(MainActivity.this, R.string.fresherGame, Toast.LENGTH_SHORT).show();
-                        isValid = true;
                         break;
                     case 1:
-                        BoardUtils.BOARD_TILES_PER_ROW = 12;
-                        BoardUtils.NUM_BOARD_TILES = 144;
-                        BoardUtils.NUM_BOMBS = 20;
-                        BoardUtils.GAME_MODE = BoardUtils.DIFFICULTY = 2;
+                        setGameMode(12, 144, 20, 2);
                         gameMode = "juniorRecord";
                         Toast.makeText(MainActivity.this, R.string.juniorGame, Toast.LENGTH_SHORT).show();
-                        isValid = true;
                         break;
                     case 2:
-                        BoardUtils.BOARD_TILES_PER_ROW = 16;
-                        BoardUtils.NUM_BOARD_TILES = 256;
-                        BoardUtils.NUM_BOMBS = 40;
-                        BoardUtils.GAME_MODE = BoardUtils.DIFFICULTY = 3;
+                        setGameMode(16, 256, 40, 3);
                         gameMode = "seniorRecord";
                         Toast.makeText(MainActivity.this, R.string.seniorGame, Toast.LENGTH_SHORT).show();
-                        isValid = true;
                         break;
                     case 3:
-                        BoardUtils.BOARD_TILES_PER_ROW = 16;
-                        BoardUtils.NUM_BOARD_TILES = 480;
-                        BoardUtils.NUM_BOMBS = 99;
-                        BoardUtils.GAME_MODE = BoardUtils.DIFFICULTY = 4;
+                        setGameMode(16, 480, 99, 4);
                         gameMode = "expertRecord";
                         Toast.makeText(MainActivity.this, R.string.expertGame, Toast.LENGTH_SHORT).show();
-                        isValid = true;
                         break;
                     case 4:
-                        BoardUtils.BOARD_TILES_PER_ROW = 16;
-                        BoardUtils.NUM_BOARD_TILES = 480;
-                        BoardUtils.NUM_BOMBS = 99;
-                        BoardUtils.GAME_MODE = BoardUtils.DIFFICULTY = 3;
+                        setGameMode(16, 480, 99, 4);
                         gameMode = "customRecord";
-                        isValid = true;
                         Toast.makeText(MainActivity.this, R.string.customGame, Toast.LENGTH_SHORT).show();
                         break;
                     default:
+                        isValid = false;
                         Toast.makeText(MainActivity.this, "Error!", Toast.LENGTH_SHORT).show();
                         break;
                 }
-
-                try {
-                    if (isValid) {
-                        final Intent newGameIntent = new Intent(MainActivity.this, GameActivity.class);
-                        newGameIntent.putExtra("gameMode", gameMode);
-                        startActivity(newGameIntent);
-                    } else {
-                        Toast.makeText(MainActivity.this, "Error!", Toast.LENGTH_SHORT).show();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                if (isValid) {
+                    final Intent newGameIntent = new Intent(MainActivity.this, GameActivity.class);
+                    newGameIntent.putExtra("gameMode", gameMode);
+                    newGameIntent.putExtra("gameState", "newGame");
+                    startActivityForResult(newGameIntent, GAME_START);
+                } else {
+                    Toast.makeText(MainActivity.this, "Error!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
         final AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void setGameMode(int rows, int total, int bombs, int mode) {
+        BoardUtils.BOARD_TILES_PER_ROW = rows;
+        BoardUtils.NUM_BOARD_TILES = total;
+        BoardUtils.NUM_BOMBS = bombs;
+        BoardUtils.GAME_MODE = BoardUtils.DIFFICULTY = mode;
+        gameSettings = getSharedPreferences("gameInfo", 0);
+        SharedPreferences.Editor editor = gameSettings.edit();
+        editor.putInt("rows", rows);
+        editor.putInt("total", total);
+        editor.putInt("bombs", bombs);
+        editor.putInt("mode", mode);
+        editor.apply();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == GAME_START) {
+            if (resultCode != Activity.RESULT_OK) {
+                mBtnResume.setVisibility(View.GONE);
+                return;
+            }
+            String gameState = data.getExtras().getString("gameState");
+            SharedPreferences.Editor editor = userSettings.edit();
+            if (gameState.equals("paused")) {
+                mBtnResume.setVisibility(View.VISIBLE);
+                editor.putString("gameState", "paused");
+                editor.apply();
+            } else {
+                editor.remove("gameState");
+                editor.apply();
+            }
+        }
     }
 }

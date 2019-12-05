@@ -2,8 +2,10 @@ package com.example.dntminesweeper;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.media.MediaPlayer;
@@ -23,7 +25,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +33,8 @@ import com.example.dntminesweeper.Board.Board;
 import com.example.dntminesweeper.Board.BoardUtils;
 import com.example.dntminesweeper.Tiles.BombTile;
 import com.example.dntminesweeper.Tiles.Tile;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,25 +44,23 @@ import java.util.TimerTask;
 
 public class GameActivity extends AppCompatActivity implements
         View.OnClickListener, MediaPlayer.OnCompletionListener {
-
-    Map<Integer, Tile> boardSetup;
-    Map<Integer, ImageView> tiles;
-    Board board;
+    private Map<Integer, Tile> boardSetup;
+    private Map<Integer, ImageView> tiles;
+    private Board board;
 
     private TextView mTvBombCounter, mTvTimer, mTvFlagCounter;
     private ImageView mImvGameFace;
     private ImageButton mBtnReveal;
-
-    private boolean isGameOver = false, timerStarted = false, isGamePaused = false;
-    private String gameMode;
-    private int seconds = 0, minutes = 0, flagCount = 0;
-
     private MediaPlayer mMediaPlayer;
-    private boolean isRevealingBomb = true, firstClick = true;
-
     private LinearLayout tileLayout;
     private ScrollView scrollView;
     private RelativeLayout gameLayout, bannerLayout, mRlGameDisplay;
+
+    private boolean isGameOver = false, timerStarted = false;
+    private String gameMode;
+    private int seconds = 0, minutes = 0, flagCount = 0;
+    private boolean isRevealingBomb = true, firstClick = true, paused = false;
+    private SharedPreferences gameData;
     Timer timer;
 
     @Override
@@ -70,12 +71,46 @@ public class GameActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_game);
         componentsInit();
         tiles = new HashMap<>();
-        createGame();
+        String gameState = getIntent().getExtras().getString("gameState");
         setContentView(createGameGrid(BoardUtils.NUM_BOARD_TILES, BoardUtils.BOARD_TILES_PER_ROW));
+        createHashMapTiles();
+        if (gameState != null && gameState.equals("resume")) {
+            loadGameData();
+        } else {
+            createGame();
+        }
         mTvBombCounter.setText("/ ");
         mTvBombCounter.append(BoardUtils.NUM_BOMBS + "");
 
-        createHashMapTiles();
+    }
+
+    private void loadGameData() {
+        try {
+            firstClick = false;
+            gameData = getSharedPreferences("gameData", 0);
+            String gameDataBoard = gameData.getString("gameDataBoard", "");
+            seconds = gameData.getInt("seconds", -1);
+            minutes = gameData.getInt("minutes", -1);
+            flagCount = gameData.getInt("flagCount", 0) - 1;
+            updateFlag(true);
+            isRevealingBomb = gameData.getBoolean("isRevealingBomb", false);
+            mBtnReveal.setImageResource(isRevealingBomb ? R.drawable.ic_classic_mine_normal
+                    : R.drawable.ic_classic_flag);
+            Gson gson = new Gson();
+            boardSetup = new HashMap<>();
+            boardSetup = gson.fromJson(gameDataBoard, new TypeToken<Map<Integer, Tile>>() {
+            }.getType());
+            for (int i : boardSetup.keySet()) {
+                if (boardSetup.get(i).isRevealed()) {
+                    startReveal(tiles.get(i), boardSetup.get(i));
+                }
+                if (boardSetup.get(i).isFlagged()) {
+                    tiles.get(i).setImageResource(R.drawable.ic_classic_flag);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void componentsInit() {
@@ -93,7 +128,8 @@ public class GameActivity extends AppCompatActivity implements
         mImvGameFace.setOnClickListener(this);
 
         gameMode = getIntent().getExtras().getString("gameMode");
-        Toast.makeText(this, gameMode, Toast.LENGTH_SHORT).show();
+        gameData = getSharedPreferences("gameData", 0);
+
     }
 
     private View createGameGrid(int numberOfTiles, int tilesPerRow) {
@@ -173,29 +209,26 @@ public class GameActivity extends AppCompatActivity implements
         boardSetup = board.getGameBoard();
     }
 
+    Thread timerThread = null;
+
     public void startTimer() {
         if (!timerStarted) {
-            if (timer != null) {
-                timer.cancel();
-                timer = null;
-                seconds = 0;
-                minutes = 0;
-                mTvTimer.setText(R.string.default_timer_text);
-            }
-            Thread timerThread = new Thread(new Runnable() {
+            timerThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     timer = new Timer();
                     timer.scheduleAtFixedRate(new TimerTask() {
                         @Override
                         public void run() {
-                            String stringSeconds = (seconds < 10) ? "0" + seconds : String.valueOf(seconds);
-                            String stringMinutes = (minutes < 10) ? "0" + minutes : String.valueOf(minutes);
-                            updateTimerUI(stringMinutes + ":" + stringSeconds);
-                            seconds++;
-                            if (seconds == 60) {
-                                seconds = 0;
-                                minutes = minutes + 1;
+                            if (!paused) {
+                                String stringSeconds = (seconds < 10) ? "0" + seconds : String.valueOf(seconds);
+                                String stringMinutes = (minutes < 10) ? "0" + minutes : String.valueOf(minutes);
+                                updateTimerUI(stringMinutes + ":" + stringSeconds);
+                                seconds++;
+                                if (seconds == 60) {
+                                    seconds = 0;
+                                    minutes = minutes + 1;
+                                }
                             }
                         }
                     }, 0, 1000);
@@ -215,27 +248,51 @@ public class GameActivity extends AppCompatActivity implements
         });
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();
-        restoreState();
+        if (!firstClick) {
+            restoreState();
+        }
     }
 
     private void restoreState() {
         startTimer();
+        paused = false;
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        paused = true;
     }
 
+    @Override
+    public void onBackPressed() {
+        storeCurrentGameState();
+        final Intent pausedIntent = new Intent();
+        pausedIntent.putExtra("gameState", "paused");
+        setResult(Activity.RESULT_OK, pausedIntent);
+        finish();
+    }
+
+    private void storeCurrentGameState() {
+        Gson gson = new Gson();
+        String gameDataBoard = gson.toJson(boardSetup);
+        SharedPreferences.Editor editor = gameData.edit();
+        editor.putString("gameDataBoard", gameDataBoard);
+        editor.putInt("seconds", seconds);
+        editor.putInt("minutes", minutes);
+        editor.putInt("flagCount", flagCount);
+        editor.putBoolean("isRevealingBomb", isRevealingBomb);
+        editor.apply();
+    }
 
     @Override
     public void onClick(View v) {
         if (v == mBtnReveal) {
-            mBtnReveal.setImageResource(isRevealingBomb ? R.drawable.ic_classic_flag : R.drawable.ic_classic_mine_normal);
+            mBtnReveal.setImageResource(isRevealingBomb ? R.drawable.ic_classic_flag
+                    : R.drawable.ic_classic_mine_normal);
             isRevealingBomb = !isRevealingBomb;
         } else if (v == mImvGameFace) {
             android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
@@ -245,7 +302,6 @@ public class GameActivity extends AppCompatActivity implements
             builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    timerStarted = false;
                     playAgain();
                 }
             });
@@ -259,7 +315,7 @@ public class GameActivity extends AppCompatActivity implements
             builder.show();
         } else {
             Tile tile = boardSetup.get(v.getTag());
-            if (tile.isRevealed()) {
+            if (tile != null && tile.isRevealed()) {
                 int bombCount = tile.getTileImageint();
                 for (int j : tile.getNeighbours()) {
                     if (boardSetup.get(j).isFlagged()) {
@@ -440,6 +496,8 @@ public class GameActivity extends AppCompatActivity implements
         gameOverDialog.setNegativeButton("Exit", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                clearPausedData();
+                setResult(Activity.RESULT_CANCELED);
                 finish();
             }
         });
@@ -523,7 +581,7 @@ public class GameActivity extends AppCompatActivity implements
 
                 if (count == BoardUtils.NUM_BOARD_TILES - BoardUtils.NUM_BOMBS) {
                     isGameOver = true;
-
+                    paused = true;
                     AlertDialog.Builder winDialog = new AlertDialog.Builder(this);
                     winDialog.setTitle("Congratulations!");
                     revealAllTiles();
@@ -552,6 +610,8 @@ public class GameActivity extends AppCompatActivity implements
                     winDialog.setNegativeButton("Exit", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            clearPausedData();
+                            setResult(Activity.RESULT_CANCELED);
                             finish();
                         }
                     });
@@ -573,15 +633,23 @@ public class GameActivity extends AppCompatActivity implements
         }
     }
 
+    private void clearPausedData() {
+        SharedPreferences.Editor editor = gameData.edit();
+        editor.remove("gameDataBoard");
+        editor.apply();
+    }
+
     private void playAgain() {
+        paused = false;
+        seconds = minutes = 0;
         for (int i = 0; i < tiles.size(); i++) {
             tiles.get(i).setImageDrawable(getResources().getDrawable(R.drawable.ic_classic_unrevealed_tile));
         }
         mImvGameFace.setImageDrawable(getResources().getDrawable(R.drawable.im_happy_face));
-        flagCount = 0;
         mTvFlagCounter.setText(String.valueOf(flagCount));
-        isRevealingBomb = true;
         mBtnReveal.setImageResource(R.drawable.ic_classic_mine_normal);
+        isRevealingBomb = true;
+        flagCount = 0;
         timerStarted = isGameOver = false;
         firstClick = true;
         createGame();

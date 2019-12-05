@@ -3,12 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/ic_home_background"
+    android:background="@drawable/im_home_background"
     tools:context=".MainActivity">
 
     <LinearLayout
         android:layout_width="200dp"
-        android:layout_height="360dp"
+        android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:background="@drawable/ic_button_shape"
@@ -18,50 +18,45 @@
         android:paddingRight="15dp"
         android:paddingBottom="15dp">
 
-        <RelativeLayout
+        <Button
+            android:id="@+id/btn_ResumeGame"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">c
+            android:layout_height="wrap_content"
+            android:text="RESUME"
+            android:textSize="23dp"
+            android:visibility="gone"
+            android:textStyle="bold"></Button>
 
-            <Button
-                android:id="@+id/btn_NewGame"
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:text="NEW GAME"
-                android:textSize="23dp"
-                android:textStyle="bold"></Button>
+        <Button
+            android:id="@+id/btn_NewGame"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="NEW GAME"
+            android:textSize="23dp"
+            android:textStyle="bold"></Button>
 
-            <Button
-                android:id="@+id/btn_HighScore"
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:layout_below="@id/btn_NewGame"
-                android:layout_centerHorizontal="true"
-                android:layout_gravity="center"
-                android:text="HIGH SCORE"
-                android:textSize="23dp"
-                android:textStyle="bold"></Button>
+        <Button
+            android:id="@+id/btn_HighScore"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="HIGH SCORE"
+            android:textSize="23dp"
+            android:textStyle="bold"></Button>
 
-            <Button
-                android:id="@+id/btn_Settings"
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:layout_below="@id/btn_HighScore"
-                android:layout_centerHorizontal="true"
-                android:layout_gravity="center"
-                android:text="SETTINGS"
-                android:textSize="23dp"
-                android:textStyle="bold"></Button>
+        <Button
+            android:id="@+id/btn_Settings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SETTINGS"
+            android:textSize="23dp"
+            android:textStyle="bold"></Button>
 
-            <Button
-                android:id="@+id/btn_Help"
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:layout_below="@id/btn_Settings"
-                android:layout_centerHorizontal="true"
-                android:layout_gravity="center"
-                android:text="HELP"
-                android:textSize="23dp"
-                android:textStyle="bold"></Button>
-        </RelativeLayout>
+        <Button
+            android:id="@+id/btn_Help"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="HELP"
+            android:textSize="23dp"
+            android:textStyle="bold"></Button>
     </LinearLayout>
 </RelativeLayout>

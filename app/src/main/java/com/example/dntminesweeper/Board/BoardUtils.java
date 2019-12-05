@@ -14,7 +14,7 @@ public class BoardUtils {
     private static int[] FIRST_COLUMN;
     private static int[] LAST_COLUMN;
     public static int DIFFICULTY;
-
+    public static String TAG = "debug";
 
     public BoardUtils() {
     }

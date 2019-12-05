@@ -1,5 +1,6 @@
 package com.example.dntminesweeper;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -14,12 +15,14 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
     public static boolean isVibrationOn = true;
     public static boolean isMusicOn = true;
     private ImageButton mBtnSound, mBtnMusic, mBtnVibration;
+    private SharedPreferences userSettings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_settings);
         componentsInit();
     }
@@ -35,22 +38,27 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         musicControl(!isMusicOn);
         soundControl(!isSoundOn);
         vibrateControl(!isVibrationOn);
+        userSettings = getApplicationContext().getSharedPreferences("UserInfo", 0);
     }
 
     @Override
     public void onClick(View view) {
+        SharedPreferences.Editor editor = userSettings.edit();
         switch (view.getId()) {
             case R.id.btn_MusicControl:
                 soundControl(isMusicOn);
                 isMusicOn = !isMusicOn;
+                editor.putBoolean("isMusicOn", isMusicOn);
                 break;
             case R.id.btn_SoundControl:
                 musicControl(isSoundOn);
                 isSoundOn = !isSoundOn;
+                editor.putBoolean("isSoundOn", isSoundOn);
                 break;
             case R.id.btn_VibrateControl:
                 vibrateControl(isVibrationOn);
                 isVibrationOn = !isVibrationOn;
+                editor.putBoolean("isVibrationOn", isVibrationOn);
                 break;
             case R.id.btn_back_settings:
                 onBackPressed();
@@ -59,6 +67,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 Toast.makeText(this, "Error!", Toast.LENGTH_SHORT).show();
                 break;
         }
+        editor.commit();
     }
 
     public void soundControl(boolean sound) {
