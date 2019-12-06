@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -55,6 +56,7 @@ public class GameActivity extends AppCompatActivity implements
     private LinearLayout tileLayout;
     private ScrollView scrollView;
     private RelativeLayout gameLayout, bannerLayout, mRlGameDisplay;
+    private View dialogView;
 
     private boolean isGameOver = false, timerStarted = false;
     private String gameMode;
@@ -480,28 +482,27 @@ public class GameActivity extends AppCompatActivity implements
         isGameOver = true;
         AlertDialog.Builder gameOverDialog = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
+        dialogView = inflater.inflate(R.layout.lose_dialog, null);
         revealAllTiles();
         mImvGameFace.setImageDrawable(getResources().getDrawable(R.drawable.ic_deadface));
-        gameOverDialog.setTitle("OOPS! You clicked the bomb!");
-        int time = minutes * 60 + seconds;
-        gameOverDialog.setMessage("Time played: " + time + " sec\n" +
-                "Bomb found: " + flagCount + " / " + BoardUtils.NUM_BOMBS);
-        gameOverDialog.setPositiveButton("Play again", new DialogInterface.OnClickListener() {
+
+        gameOverDialog.setView(dialogView);
+        final AlertDialog gameOver = gameOverDialog.create();
+        dialogView.findViewById(R.id.btn_exit).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                timerStarted = false;
-                playAgain();
-            }
-        });
-        gameOverDialog.setNegativeButton("Exit", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                clearPausedData();
-                setResult(Activity.RESULT_CANCELED);
+            public void onClick(View v) {
                 finish();
             }
         });
-
+        dialogView.findViewById(R.id.btn_playagain).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                timerStarted = false;
+                gameOver.dismiss();
+                playAgain();
+            }
+        });
+        loseAnnounce();
         if (SettingsActivity.isSoundOn) {
             mMediaPlayer = MediaPlayer.create(this, R.raw.gameoversound);
             mMediaPlayer.setOnCompletionListener(this);
@@ -513,8 +514,7 @@ public class GameActivity extends AppCompatActivity implements
             assert vib != null;
             vib.vibrate(300);
         }
-
-        gameOverDialog.show();
+        gameOver.show();
     }
 
     private void revealAllTiles() {
@@ -583,38 +583,28 @@ public class GameActivity extends AppCompatActivity implements
                     isGameOver = true;
                     paused = true;
                     AlertDialog.Builder winDialog = new AlertDialog.Builder(this);
-                    winDialog.setTitle("Congratulations!");
+                    LayoutInflater inflater = this.getLayoutInflater();
+                    dialogView = inflater.inflate(R.layout.win_dialog, null);
+                    winDialog.setView(dialogView);
                     revealAllTiles();
                     timer.cancel();
-                    SharedPreferences pref = getApplicationContext().getSharedPreferences("UserInfo", 0);
-                    int currentRecord = minutes * 60 + seconds;
-                    int lastRecord = pref.getInt(gameMode, -1);
-                    if (currentRecord < lastRecord) {
-                        SharedPreferences.Editor editor = pref.edit();
-                        editor.putInt(gameMode, currentRecord);
-                        editor.commit();
-                        String[] player = gameMode.split("R");
-                        winDialog.setMessage("You've made a new record, " + player[0]
-                                + ": " + currentRecord + " sec");
-                    } else {
-                        winDialog.setMessage("Time played: " + currentRecord + " sec\n" +
-                                "Try harder to break the record of " + lastRecord + " sec");
-                    }
-                    winDialog.setPositiveButton(R.string.play_again, new DialogInterface.OnClickListener() {
+                    final AlertDialog wingame = winDialog.create();
+                    dialogView.findViewById(R.id.btn_exit).setOnClickListener(new View.OnClickListener() {
                         @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            playAgain();
-                        }
-                    });
-
-                    winDialog.setNegativeButton("Exit", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
+                        public void onClick(View v) {
                             clearPausedData();
                             setResult(Activity.RESULT_CANCELED);
                             finish();
                         }
                     });
+                    dialogView.findViewById(R.id.btn_playagain).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            wingame.dismiss();
+                            playAgain();
+                        }
+                    });
+                    winAnnounce();
 
                     if (SettingsActivity.isSoundOn) {
                         mMediaPlayer = MediaPlayer.create(this, R.raw.winsound);
@@ -627,7 +617,7 @@ public class GameActivity extends AppCompatActivity implements
                         assert vib != null;
                         vib.vibrate(300);
                     }
-                    winDialog.show();
+                    wingame.show();
                 }
             }
         }
@@ -637,6 +627,36 @@ public class GameActivity extends AppCompatActivity implements
         SharedPreferences.Editor editor = gameData.edit();
         editor.remove("gameDataBoard");
         editor.apply();
+    }
+    private  void loseAnnounce(){
+        TextView mTVMode= dialogView.findViewById(R.id.mode_game_lose);
+        TextView mTvFlags= dialogView.findViewById(R.id.text_flags);
+        TextView mTvTime= dialogView.findViewById(R.id.totaltime_lose);
+        int time= minutes * 60 + seconds;
+        mTvTime.setText(time+"");
+        String[] player = gameMode.split("R");
+        mTVMode.setText(String.valueOf(player[0]));
+        mTvFlags.setText(String.valueOf(flagCount));
+    }
+    private void winAnnounce() {
+        TextView mTvMode = dialogView.findViewById(R.id.mode_game_win);
+        TextView mTvTime = dialogView.findViewById(R.id.totaltime_win);
+        TextView mTvBreakTime = dialogView.findViewById(R.id.break_time);
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("UserInfo", 0);
+        int currentRecord = minutes * 60 + seconds;
+        mTvTime.setText(currentRecord+"");
+        int lastRecord = pref.getInt(gameMode, -1);
+        String[] player = gameMode.split("R");
+
+        if (currentRecord < lastRecord) {
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putInt(gameMode, currentRecord);
+            editor.commit();
+            mTvBreakTime.setText("You have made a new Record");
+        } else {
+            mTvBreakTime.setText("Highest Record: " + lastRecord + " sec");
+        }
+        mTvMode.setText(String.valueOf(player[0]));
     }
 
     private void playAgain() {
