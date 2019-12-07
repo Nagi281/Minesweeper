@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_gradient"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_customizing"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:gravity="center"
+        android:text="@string/customizeGame"
+        android:textColor="@color/colorYellow"
+        android:textSize="32sp" />
+
+    <RelativeLayout
+        android:id="@+id/ly_rows"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_customizing"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rows"
+            android:textColor="@color/colorWhite"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/tv_custom_rows"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="9"
+            android:textColor="@color/colorWhite"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btn_rows_down"
+            android:layout_width="50dp"
+            android:layout_height="@dimen/seekBarHeight"
+            android:layout_below="@+id/tv_custom_rows"
+            android:layout_alignParentStart="true"
+            android:background="@drawable/ic_keyboard_arrow_left" />
+
+        <Button
+            android:id="@+id/btn_rows_up"
+            android:layout_width="50dp"
+            android:layout_height="@dimen/seekBarHeight"
+            android:layout_below="@+id/tv_custom_rows"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/ic_keyboard_arrow_right" />
+
+        <SeekBar
+            android:id="@+id/sb_rows"
+            android:layout_width="@dimen/seekBarWidth"
+            android:layout_height="@dimen/seekBarHeight"
+            android:layout_below="@id/tv_custom_rows"
+            android:layout_centerHorizontal="true"
+            android:progressDrawable="@drawable/seek_bar_style"
+            android:splitTrack="false"
+            android:thumb="@drawable/thumb" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/ly_columns"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ly_rows"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Columns"
+            android:textColor="@color/colorWhite"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/tv_custom_columns"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="9"
+            android:textColor="@color/colorWhite"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btn_columns_down"
+            android:layout_width="50dp"
+            android:layout_height="@dimen/seekBarHeight"
+            android:layout_below="@+id/tv_custom_columns"
+            android:layout_alignParentStart="true"
+            android:background="@drawable/ic_keyboard_arrow_left" />
+
+        <Button
+            android:id="@+id/btn_columns_up"
+            android:layout_width="50dp"
+            android:layout_height="@dimen/seekBarHeight"
+            android:layout_below="@+id/tv_custom_columns"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/ic_keyboard_arrow_right" />
+
+        <SeekBar
+            android:id="@+id/sb_columns"
+            android:layout_width="@dimen/seekBarWidth"
+            android:layout_height="@dimen/seekBarHeight"
+            android:layout_below="@id/tv_custom_columns"
+            android:layout_centerHorizontal="true"
+            android:progressDrawable="@drawable/seek_bar_style"
+            android:splitTrack="false"
+            android:thumb="@drawable/thumb" />
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/ly_mines"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ly_columns"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mines"
+            android:textColor="@color/colorWhite"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/tv_custom_mines"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="10"
+            android:textColor="@color/colorWhite"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btn_mines_down"
+            android:layout_width="50dp"
+            android:layout_height="@dimen/seekBarHeight"
+            android:layout_below="@+id/tv_custom_mines"
+            android:layout_alignParentStart="true"
+            android:background="@drawable/ic_keyboard_arrow_left" />
+
+        <Button
+            android:id="@+id/btn_mines_up"
+            android:layout_width="50dp"
+            android:layout_height="@dimen/seekBarHeight"
+            android:layout_below="@+id/tv_custom_mines"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/ic_keyboard_arrow_right" />
+
+        <SeekBar
+            android:id="@+id/sb_mines"
+            android:layout_width="@dimen/seekBarWidth"
+            android:layout_height="@dimen/seekBarHeight"
+            android:layout_below="@id/tv_custom_mines"
+            android:layout_centerHorizontal="true"
+            android:progressDrawable="@drawable/seek_bar_style"
+            android:splitTrack="false"
+            android:thumb="@drawable/thumb" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ly_mines"
+        android:layout_margin="20dp">
+
+        <Button
+            android:id="@+id/btn_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:background="@color/colorYellow"
+            android:text="Cancel"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btn_OK"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:background="@color/colorYellow"
+            android:text="GO"
+            android:textSize="18sp" />
+    </RelativeLayout>
+
+</RelativeLayout>

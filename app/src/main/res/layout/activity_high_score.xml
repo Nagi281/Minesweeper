@@ -128,42 +128,5 @@
                 android:textColor="@color/colorWhite"
                 android:textSize="25sp" />
         </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="20dp">
-
-            <TextView
-                android:id="@+id/tv_customMode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:text="Custom"
-                android:textColor="@color/colorWhite"
-                android:textSize="25sp" />
-
-            <TextView
-                android:id="@+id/tv_customModeInfo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/tv_customMode"
-                android:layout_alignParentLeft="true"
-                android:text="10 x 32   100 bombs"
-                android:textColor="@color/colorWhite"
-                android:textSize="20sp" />
-
-            <TextView
-                android:id="@+id/tv_customRecord"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:text="200 sec"
-                android:textColor="@color/colorWhite"
-                android:textSize="25sp" />
-        </RelativeLayout>
-
     </LinearLayout>
 </RelativeLayout>

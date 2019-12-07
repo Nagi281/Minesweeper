@@ -2,5 +2,6 @@
 <resources>
     <dimen name="iconOnBanner">36dp</dimen>
     <dimen name="iconSmallOnBanner">25dp</dimen>
-
+    <dimen name="seekBarWidth">250dp</dimen>
+    <dimen name="seekBarHeight">24dp</dimen>
 </resources>

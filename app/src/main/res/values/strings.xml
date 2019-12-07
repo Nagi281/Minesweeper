@@ -17,6 +17,6 @@
     <string name="seniorGame">Hi there, Senior!</string>
     <string name="expertGame">Keep going, Expert!</string>
     <string name="customGame">Don\'t make it weird, please!</string>
-
+    <string name="customizeGame">Customize your Game</string>
 
 </resources>

@@ -29,7 +29,7 @@ public class HighScoreActivity extends AppCompatActivity {
         String username = pref.getString("username", null);
         ((TextView) findViewById(R.id.tv_Settings)).setText(username + "'s High Score");
         final String[] gameMode = new String[]{"fresherRecord", "juniorRecord",
-                "seniorRecord", "expertRecord", "customRecord"};
+                "seniorRecord", "expertRecord"};
         int[] record = new int[5];
         for (int i = 0; i < gameMode.length; i++) {
             record[i] = pref.getInt(gameMode[i], -1);
@@ -38,12 +38,5 @@ public class HighScoreActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tv_juniorRecord)).setText(record[1] + " sec");
         ((TextView) findViewById(R.id.tv_seniorRecord)).setText(record[2] + " sec");
         ((TextView) findViewById(R.id.tv_expertRecord)).setText(record[3] + " sec");
-        ((TextView) findViewById(R.id.tv_customRecord)).setText(record[4] + " sec");
-        int cusTomRows = pref.getInt("customRows", -1);
-        int cusTomCols = pref.getInt("customCols", -1);
-        int cusTomMines = pref.getInt("customMines", -1);
-        String customGame = cusTomRows + " x " + cusTomCols + "\n"
-                + cusTomMines + " bombs";
-        ((TextView) findViewById(R.id.tv_customModeInfo)).setText(customGame);
     }
 }

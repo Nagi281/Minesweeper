@@ -12,4 +12,13 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
+
+    <style name="AlertDialog" parent="Base.Theme.AppCompat.Light.Dialog">
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:textColorPrimary">@color/colorWhite</item>
+    </style>
+    <style name="ListFont" parent="@android:style/Widget.ListView">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:typeface">sans</item>
+    </style>
 </resources>

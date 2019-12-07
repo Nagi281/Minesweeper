@@ -11,6 +11,7 @@ import android.graphics.Point;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -19,7 +20,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -491,6 +491,7 @@ public class GameActivity extends AppCompatActivity implements
         dialogView.findViewById(R.id.btn_exit).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                gameOver.dismiss();
                 finish();
             }
         });
@@ -594,6 +595,7 @@ public class GameActivity extends AppCompatActivity implements
                         public void onClick(View v) {
                             clearPausedData();
                             setResult(Activity.RESULT_CANCELED);
+                            wingame.dismiss();
                             finish();
                         }
                     });
@@ -628,35 +630,40 @@ public class GameActivity extends AppCompatActivity implements
         editor.remove("gameDataBoard");
         editor.apply();
     }
-    private  void loseAnnounce(){
-        TextView mTVMode= dialogView.findViewById(R.id.mode_game_lose);
-        TextView mTvFlags= dialogView.findViewById(R.id.text_flags);
-        TextView mTvTime= dialogView.findViewById(R.id.totaltime_lose);
-        int time= minutes * 60 + seconds;
-        mTvTime.setText(time+"");
+
+    private void loseAnnounce() {
+        TextView mTVMode = dialogView.findViewById(R.id.mode_game_lose);
+        TextView mTvFlags = dialogView.findViewById(R.id.text_flags);
+        TextView mTvTime = dialogView.findViewById(R.id.totaltime_lose);
+        int time = minutes * 60 + seconds;
+        mTvTime.setText(String.valueOf(time));
         String[] player = gameMode.split("R");
         mTVMode.setText(String.valueOf(player[0]));
         mTvFlags.setText(String.valueOf(flagCount));
     }
+
     private void winAnnounce() {
         TextView mTvMode = dialogView.findViewById(R.id.mode_game_win);
         TextView mTvTime = dialogView.findViewById(R.id.totaltime_win);
         TextView mTvBreakTime = dialogView.findViewById(R.id.break_time);
         SharedPreferences pref = getApplicationContext().getSharedPreferences("UserInfo", 0);
         int currentRecord = minutes * 60 + seconds;
-        mTvTime.setText(currentRecord+"");
+        mTvTime.setText(currentRecord + "");
         int lastRecord = pref.getInt(gameMode, -1);
-        String[] player = gameMode.split("R");
-
-        if (currentRecord < lastRecord) {
-            SharedPreferences.Editor editor = pref.edit();
-            editor.putInt(gameMode, currentRecord);
-            editor.commit();
-            mTvBreakTime.setText("You have made a new Record");
+        String[] record = gameMode.split("R");
+        if (!record[0].equals("custom")) {
+            if (currentRecord < lastRecord) {
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putInt(gameMode, currentRecord);
+                editor.commit();
+                mTvBreakTime.setText("You have made a new Record");
+            } else {
+                mTvBreakTime.setText("Highest Record: " + lastRecord + " sec");
+            }
         } else {
-            mTvBreakTime.setText("Highest Record: " + lastRecord + " sec");
+            mTvBreakTime.setText("Try something harder!");
         }
-        mTvMode.setText(String.valueOf(player[0]));
+        mTvMode.setText(String.valueOf(record[0]));
     }
 
     private void playAgain() {
@@ -669,7 +676,8 @@ public class GameActivity extends AppCompatActivity implements
         mTvFlagCounter.setText(String.valueOf(flagCount));
         mBtnReveal.setImageResource(R.drawable.ic_classic_mine_normal);
         isRevealingBomb = true;
-        flagCount = 0;
+        flagCount = -1;
+        updateFlag(true);
         timerStarted = isGameOver = false;
         firstClick = true;
         createGame();
