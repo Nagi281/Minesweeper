@@ -9,11 +9,14 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.dntminesweeper.Music.MusicService;
+
 public class HelpActivity extends AppCompatActivity {
     private ImageView mIvBackground, mIvBack;
     private ImageButton mIBtnBack, mIBtnNext;
     private TextView mEdtStep;
     private int imageIndex = 1;
+    private MusicService musicService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +35,8 @@ public class HelpActivity extends AppCompatActivity {
         mIBtnBack.setVisibility(View.GONE);
         ((TextView) findViewById(R.id.tv_Settings)).setText("Help");
         mEdtStep = findViewById(R.id.tv_step);
+        musicService = new MusicService(this);
+        MusicService.startPlayingMusic(musicService, R.raw.kiss_the_rain);
     }
 
     private void startEventListening() {
@@ -107,5 +112,25 @@ public class HelpActivity extends AppCompatActivity {
                 Toast.makeText(this, "Error!", Toast.LENGTH_SHORT).show();
                 break;
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (SettingsActivity.isMusicOn) {
+            musicService.resumeBgMusic();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        musicService.pauseBgMusic();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        musicService.stop();
     }
 }

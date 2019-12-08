@@ -31,6 +31,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.dntminesweeper.Board.Board;
 import com.example.dntminesweeper.Board.BoardUtils;
+import com.example.dntminesweeper.Music.MusicService;
 import com.example.dntminesweeper.Tiles.BombTile;
 import com.example.dntminesweeper.Tiles.Tile;
 import com.google.gson.Gson;
@@ -62,6 +63,7 @@ public class GameActivity extends AppCompatActivity implements
     private int seconds = 0, minutes = 0, flagCount = 0;
     private boolean isRevealingBomb = true, firstClick = true, paused = false;
     private SharedPreferences gameData;
+    private MusicService musicService;
     Timer timer;
 
     @Override
@@ -130,7 +132,8 @@ public class GameActivity extends AppCompatActivity implements
 
         gameMode = getIntent().getExtras().getString("gameMode");
         gameData = getSharedPreferences("gameData", 0);
-
+        musicService = new MusicService(this);
+        MusicService.startPlayingMusic(musicService, R.raw.to_glory);
     }
 
     private View createGameGrid(int numberOfTiles, int tilesPerRow) {
@@ -255,6 +258,9 @@ public class GameActivity extends AppCompatActivity implements
         if (!firstClick) {
             restoreState();
         }
+        if (SettingsActivity.isMusicOn) {
+            musicService.resumeBgMusic();
+        }
     }
 
     private void restoreState() {
@@ -266,6 +272,7 @@ public class GameActivity extends AppCompatActivity implements
     protected void onPause() {
         super.onPause();
         paused = true;
+        musicService.pauseBgMusic();
     }
 
     @Override
@@ -274,6 +281,7 @@ public class GameActivity extends AppCompatActivity implements
         final Intent pausedIntent = new Intent();
         pausedIntent.putExtra("gameState", "paused");
         setResult(Activity.RESULT_OK, pausedIntent);
+        musicService.stop();
         finish();
     }
 

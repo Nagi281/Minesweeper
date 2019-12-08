@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.InputType;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -21,6 +22,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.dntminesweeper.Board.BoardUtils;
+import com.example.dntminesweeper.Music.MusicService;
+
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     private Button mBtnResume, mBtnNewGame, mBtnHighScore, mBtnSettings, mBtnHelp;
@@ -31,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private View dialogView;
     private SeekBar mSbMines;
     private TextView mTvMines;
+    private MusicService musicService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +51,22 @@ public class MainActivity extends AppCompatActivity {
         mBtnHighScore = findViewById(R.id.btn_HighScore);
         mBtnSettings = findViewById(R.id.btn_Settings);
         mBtnHelp = findViewById(R.id.btn_Help);
+        musicService = new MusicService(this);
+        MusicService.startPlayingMusic(musicService, R.raw.heart_of_courage);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (SettingsActivity.isMusicOn) {
+            musicService.resumeBgMusic();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        musicService.pauseBgMusic();
     }
 
     private void startEventListening() {
