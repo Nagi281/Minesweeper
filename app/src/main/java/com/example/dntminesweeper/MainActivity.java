@@ -178,7 +178,6 @@ public class MainActivity extends AppCompatActivity {
         });
         final AlertDialog dialog = builder.create();
         dialog.show();
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_gradient);
     }
 
     private void customizeGame() {

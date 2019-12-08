@@ -11,7 +11,6 @@ import android.graphics.Point;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -297,7 +296,8 @@ public class GameActivity extends AppCompatActivity implements
                     : R.drawable.ic_classic_mine_normal);
             isRevealingBomb = !isRevealingBomb;
         } else if (v == mImvGameFace) {
-            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+            paused = true;
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialog);
             builder.setTitle("Start a new game");
             builder.setMessage("Are you sure to play a new game?");
             builder.setCancelable(false);
@@ -310,11 +310,12 @@ public class GameActivity extends AppCompatActivity implements
             builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-
+                    paused = false;
                 }
             });
+            final AlertDialog newGameDialog = builder.create();
+            newGameDialog.show();
 
-            builder.show();
         } else {
             Tile tile = boardSetup.get(v.getTag());
             if (tile != null && tile.isRevealed()) {
@@ -636,7 +637,7 @@ public class GameActivity extends AppCompatActivity implements
         TextView mTvFlags = dialogView.findViewById(R.id.text_flags);
         TextView mTvTime = dialogView.findViewById(R.id.totaltime_lose);
         int time = minutes * 60 + seconds;
-        mTvTime.setText(String.valueOf(time));
+        mTvTime.setText(time + " seconds");
         String[] player = gameMode.split("R");
         mTVMode.setText(String.valueOf(player[0]));
         mTvFlags.setText(String.valueOf(flagCount));
@@ -648,7 +649,7 @@ public class GameActivity extends AppCompatActivity implements
         TextView mTvBreakTime = dialogView.findViewById(R.id.break_time);
         SharedPreferences pref = getApplicationContext().getSharedPreferences("UserInfo", 0);
         int currentRecord = minutes * 60 + seconds;
-        mTvTime.setText(currentRecord + "");
+        mTvTime.setText(currentRecord + " seconds");
         int lastRecord = pref.getInt(gameMode, -1);
         String[] record = gameMode.split("R");
         if (!record[0].equals("custom")) {
@@ -658,7 +659,7 @@ public class GameActivity extends AppCompatActivity implements
                 editor.commit();
                 mTvBreakTime.setText("You have made a new Record");
             } else {
-                mTvBreakTime.setText("Highest Record: " + lastRecord + " sec");
+                mTvBreakTime.setText("Highest Record: " + lastRecord + " seconds");
             }
         } else {
             mTvBreakTime.setText("Try something harder!");
